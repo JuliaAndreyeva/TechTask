@@ -1,0 +1,17 @@
+﻿@model List<string>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tree View</title>
+</head>
+<body>
+    <ul>
+        @foreach (var item in Model)
+        {
+            <ul>@item</ul>
+        }
+    </ul>
+</body>
+</html>
+

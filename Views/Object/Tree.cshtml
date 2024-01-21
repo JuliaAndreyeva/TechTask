@@ -1,0 +1,97 @@
+﻿@model JsonTree.ViewModels.DiagramViewModel
+
+@{
+    ViewBag.Title = "Tree";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewBag.Title</title>
+    <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/17.4.43/material.css" />
+    <script src="https://cdn.syncfusion.com/ej2/17.4.43/dist/ej2.min.js"></script>
+</head>
+<body>
+    <div id="diagram"></div>
+
+    <script>
+
+        const objectModels = @Html.Raw(Json.Serialize(Model.ObjectModels));
+        const objectChilds = @Html.Raw(Json.Serialize(Model.ObjectChildrens));
+        const diagramData = [];
+
+        function processNode(parentNodeId, parentId, xOffset, yOffset) {
+            const childNodes = objectChilds.filter(child => child.parentId === parentId);
+            for (let i = 0; i < childNodes.length; i++) {
+
+                const childNode = childNodes[i];
+                const childObjectId = childNode.childId;
+
+                const childObject = objectModels.find(obj => obj.id === childObjectId);
+
+                if (childObject) {
+                    const nodeId = parentNodeId + "_" + childObjectId;
+                    diagramData.push({
+                        id: nodeId,
+                        width: 50,
+                        height: 50,
+                        offsetX: xOffset - 70 * (i + 2),
+                        offsetY: yOffset + 50 * (i + 2),
+                        shape: 'Rectangle',
+                        annotations: [{ content: childObject.keyName + ": " + childObject.value }],
+                    });
+
+
+                    yOffset += 150;
+
+                    diagramData.push({
+                        id: parentNodeId + "_" + childObjectId + "_connector",
+                        sourceID: parentNodeId,
+                        targetID: nodeId,
+                        type: 'Orthogonal',
+                        shape: { type: 'Orthogonal', segments: [{ type: 'Orthogonal' }] },
+                        style: { strokeWidth: 2, strokeColor: '#979797' },
+                        targetDecorator: { shape: 'None' },
+                        isConnector: true,
+                        offsetX: xOffset + 100,
+                        offsetY: yOffset + 100,
+                    });
+
+                    processNode(nodeId, childObjectId, xOffset + 100, yOffset + 100);
+                }
+            }
+        }
+        var offsetForX = 100;
+
+        for (let i = 0; i < objectModels.length; i++) {
+            offsetForX += 100;
+            const rootNode = objectModels[i];
+            if (!rootNode.isRoot) {
+                continue;
+            }
+
+            diagramData.push({
+                id: rootNode.keyName,
+                width: 50,
+                height: 50,
+                offsetX: 100 + offsetForX,
+                offsetY: 100,
+                shape: 'Rectangle',
+                annotations: [{ content: rootNode.keyName + ": " + rootNode.value }],
+            });
+
+            processNode(rootNode.keyName, rootNode.id, diagramData[i].offsetX, diagramData[i].offsetY);
+        }
+
+
+        const diagram = new ej.diagrams.Diagram({
+            width: "100%",
+            height: "600px",
+            nodes: diagramData.filter(item => !item.isConnector),
+            connectors: diagramData.filter(item => item.isConnector)
+        });
+        diagram.appendTo("#diagram");
+    </script>
+</body>
+</html>
