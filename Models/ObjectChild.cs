@@ -5,7 +5,6 @@ namespace JsonTree.Models
 {
     public class ObjectChild
     {
-        //[Key]
         [ForeignKey("ParentObject")]
 
         public int ParentId { get; set; }
