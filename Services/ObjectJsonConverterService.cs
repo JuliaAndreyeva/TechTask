@@ -38,10 +38,8 @@ namespace JsonTree.Services
 
                 var objectModel = new ObjectModel()
                 {
-                    //Id = idObj++,
                     KeyName = token.Key
                 };
-                //objectModels.Add(objectModel);
                 _objectRepository.AddObject(objectModel);
 
                 if (parent_tokenkey != null)
@@ -51,7 +49,6 @@ namespace JsonTree.Services
                         ChildId = objectModel.Id,
                         ParentId = _objectRepository.FindObjectIdByKeyNullable(parent_tokenkey)
                     };
-                    //objectChilds.Add(child);
                     _objectRepository.AddChild(child);
                 }
                 else
@@ -60,17 +57,13 @@ namespace JsonTree.Services
                 if (token.Value.Children().Count() == 0)
                 {
                     objectModel.Value = token.Value.ToString();
-                    //objectModel.IsRoot = false;
-
-                    //_objectRepository.UpdateChildModel(objectModel);//післе рінейма
                     _objectRepository.UpdateObject(objectModel);
                 }
                 else
                 {
                     Dictionary<string, JToken> newChildrenDictionary = token.Value.Children()
                         .ToDictionary(child => ((JProperty)child).Name, child => ((JProperty)child).Value);
-
-
+                        
                     var childrenResult = GetChildren(newChildrenDictionary, token.Key);
 
                     foreach (var kvp in childrenResult)
